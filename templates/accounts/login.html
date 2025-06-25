@@ -1,0 +1,13 @@
+<!-- templates/accounts/login.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5" style="max-width: 400px;">
+  <h2>Login</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Accedi</button>
+  </form>
+  <p class="mt-2">Non hai un account? <a href="{% url 'accounts:register' %}">Registrati</a></p>
+</div>
+{% endblock %}

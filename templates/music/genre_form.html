@@ -1,0 +1,14 @@
+<!-- templates/music/genre_form.html -->
+{% extends 'base.html' %}
+{% block title %}{{ view.object.name if view.object else 'Nuovo Genere' }}{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>{{ view.object.name if view.object else 'Aggiungi un nuovo genere' }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Salva</button>
+    <a href="{% url 'music:song-list' %}" class="btn btn-secondary">Annulla</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>{{ playlist.name }}</h1>
+  <p>Creato da: {{ playlist.owner.username }}</p>
+  <h3>Canzoni</h3>
+  <ul>
+    {% for song in playlist.songs.all %}
+      <li>{{ song.title }} – {{ song.artist }}</li>
+    {% empty %}
+      <li>Playlist vuota.</li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'music:playlist-list' %}">← Torna alle playlist</a>
+{% endblock %}

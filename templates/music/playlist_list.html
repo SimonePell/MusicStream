@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Le tue Playlist</h1>
+  <ul>
+    {% for pl in playlists %}
+      <li><a href="{% url 'music:playlist-detail' pl.pk %}">{{ pl.name }}</a></li>
+    {% empty %}
+      <li>Non hai ancora playlist.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>{{ song.title }} – {{ song.artist }}</h1>
+  <p>Genere: {{ song.genre.name }}</p>
+  <p>Durata: {{ song.duration }}</p>
+  <a href="{% url 'music:song-list' %}">← Torna all’elenco</a>
+{% endblock %}

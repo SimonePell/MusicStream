@@ -1,0 +1,14 @@
+<!-- templates/music/song_confirm_delete.html -->
+{% extends 'base.html' %}
+{% block title %}Elimina Canzone{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Elimina canzone: {{ object.title }}</h2>
+  <p>Sei sicuro di voler eliminare questa canzone?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Conferma</button>
+    <a href="{% url 'music:song-detail' object.pk %}" class="btn btn-secondary">Annulla</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+<!-- templates/music/playlist_confirm_delete.html -->
+{% extends 'base.html' %}
+{% block title %}Elimina Playlist{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Elimina playlist: {{ object.name }}</h2>
+  <p>Sei sicuro di voler eliminare questa playlist?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Conferma</button>
+    <a href="{% url 'music:playlist-detail' object.pk %}" class="btn btn-secondary">Annulla</a>
+  </form>
+</div>
+{% endblock %}
