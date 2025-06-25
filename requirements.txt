@@ -1,3 +1,5 @@
-Django>=4.2       # Versione consigliata con supporto a Python 3.10+
-psycopg2-binary   # Driver PostgreSQL (facoltativo, usa sqlite3 per default)
+Django>=4.2       
+psycopg2-binary  
 dj-database-url>=1.0.0
+gunicorn
+whitenoise
