@@ -1,32 +1,27 @@
-import environ
-from pathlib import Path
-import dj_database_url
 import os
-if os.environ.get("RAILWAY_ENVIRONMENT"):
-    # siamo in Railway: NON leggere il file .env
-    env = environ.Env(DEBUG=(bool, False))
-else:
-    # siamo in locale: carica .env
-    env = environ.Env(DEBUG=(bool, False))
-    env.read_env()
+from pathlib import Path
 
+import dj_database_url
+import environ
 
-# 1) Legge il .env nella root
-env = environ.Env(
-    # casting e valori di default
-    DEBUG=(bool, False),
-)
-env.read_env()   # carica le variabili da .env
-
-# 2) Base dir
+# 1) Base dir
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 3) Sicurezza
-SECRET_KEY = env('DJANGO_SECRET_KEY')  # dal .env
-DEBUG      = env('DEBUG')              # dal .env
-ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=[])
+# 2) Carica il .env solo in locale (Railway non avrà un file .env)
+if not os.environ.get("RAILWAY_ENVIRONMENT"):
+    environ.Env.read_env()
 
-# 4) Installed apps, middleware, etc...
+# 3) Env con casting e default
+env = environ.Env(
+    DEBUG=(bool, False),
+)
+
+# 4) Sicurezza
+SECRET_KEY     = env("DJANGO_SECRET_KEY")
+DEBUG          = env("DEBUG")
+ALLOWED_HOSTS  = env.list("DJANGO_ALLOWED_HOSTS", default=[])
+
+# 5) Installed apps, middleware, ecc.
 INSTALLED_APPS = [
     'django.contrib.admin',
     # ...
@@ -40,22 +35,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'music_streaming.urls'
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS':    [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': { 'context_processors': [
-            'django.template.context_processors.debug',
-            # ...
-        ]},
-    },
-]
 WSGI_APPLICATION = 'music_streaming.wsgi.application'
 ASGI_APPLICATION = 'music_streaming.asgi.application'
 
-# 5) Database
-
+# 6) Database: usa sempre DATABASE_URL iniettata da Railway
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -64,20 +47,17 @@ DATABASES = {
     )
 }
 
-# 6) Validators, Internationalization, Static, ecc.
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    # ...
-]
+# 7) Internationalization, static, ecc.
 LANGUAGE_CODE = 'it-it'
 TIME_ZONE     = 'Europe/Rome'
 USE_I18N      = True
 USE_TZ        = True
 
-STATIC_URL        = '/static/'
-STATICFILES_DIRS  = [BASE_DIR / 'static']
+STATIC_URL       = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# 8) Auth URLs
 AUTH_USER_MODEL     = 'accounts.User'
 LOGIN_URL           = 'accounts:login'
 LOGIN_REDIRECT_URL  = 'music:song-list'

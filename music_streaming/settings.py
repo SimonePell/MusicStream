@@ -50,6 +50,11 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://musicstream-production.up.railway.app",
+    # aggiungi qui altri host se ne hai
+]
+
 ROOT_URLCONF = "music_streaming.urls"
 
 TEMPLATES = [
