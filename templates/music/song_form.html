@@ -1,55 +1,73 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  {% if view.object %}
-    Modifica Canzone: {{ view.object.title }}
-  {% else %}
-    Nuova Canzone
-  {% endif %}
-{% endblock %}
-
-{% block content %}
-<div class="container mt-4">
-  <h1 class="mb-3">
+  <h2 class="fs-5 mb-4">
     {% if view.object %}
       Modifica Canzone: {{ view.object.title }}
     {% else %}
       Nuova Canzone
     {% endif %}
-  </h1>
+  </h2>
+{% endblock %}
 
-  <form method="post">
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+  <form method="post" class="row g-3">
     {% csrf_token %}
     {{ form.non_field_errors }}
 
-    <div class="mb-3">
-      {{ form.title.label_tag }}
-      {{ form.title }}
+    <!-- Titolo -->
+    <div class="col-12">
+      <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">Titolo</label>
+      <input
+        type="text"
+        name="title"
+        id="{{ form.title.id_for_label }}"
+        value="{{ form.title.value|default_if_none:'' }}"
+        class="form-control form-control-lg"
+        placeholder="Inserisci titolo…">
       {{ form.title.errors }}
     </div>
 
-    <div class="mb-3">
-      {{ form.artist.label_tag }}
-      {{ form.artist }}
-      {{ form.artist.errors }}
-    </div>
-
-    <div class="mb-3">
-      {{ form.genre.label_tag }}
-      {{ form.genre }}
+    <!-- Genere -->
+    <div class="col-12">
+      <label for="{{ form.genre.id_for_label }}" class="form-label fw-bold">Genere</label>
+      <select
+        name="genre"
+        id="{{ form.genre.id_for_label }}"
+        class="form-select form-select-lg">
+        <option value="">---------</option>
+        {% for g in form.fields.genre.queryset %}
+          <option value="{{ g.pk }}"
+            {% if form.genre.value|stringformat:"s" == g.pk|stringformat:"s" %}selected{% endif %}>
+            {{ g.name }}
+          </option>
+        {% endfor %}
+      </select>
       {{ form.genre.errors }}
     </div>
 
-    <div class="mb-3">
-      {{ form.duration.label_tag }}
-      {{ form.duration }}
-      {{ form.duration.errors }}
+    <!-- Durata in minuti -->
+    <div class="col-12">
+      <label for="{{ form.duration_min.id_for_label }}" class="form-label fw-bold">Durata (minuti)</label>
+      <input
+        type="number"
+        name="duration_min"
+        id="{{ form.duration_min.id_for_label }}"
+        value="{{ form.duration_min.value|default_if_none:'' }}"
+        class="form-control form-control-lg"
+        min="0"
+        placeholder="Es. 3">
+      {{ form.duration_min.errors }}
     </div>
 
-    <button class="btn btn-primary">
-      {% if view.object %}Salva Modifiche{% else %}Crea Canzone{% endif %}
-    </button>
-    <a href="{% url 'music:song-list' %}" class="btn btn-secondary ms-2">Annulla</a>
+    <!-- Pulsanti -->
+    <div class="col-12 d-flex gap-2">
+      <button type="submit" class="btn btn-primary btn-lg">
+        {% if view.object %}Salva Modifiche{% else %}Crea Canzone{% endif %}
+      </button>
+      <a href="{% url 'music:song-list' %}" class="btn btn-secondary btn-lg">Annulla</a>
+    </div>
   </form>
 </div>
 {% endblock %}

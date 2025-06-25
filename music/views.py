@@ -3,6 +3,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.views import View
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
 
 from .models import Song, Genre, Playlist, Recommendation
 from .forms import SongForm, GenreForm, PlaylistForm
@@ -80,20 +83,24 @@ class PlaylistDetailView(LoginRequiredMixin, DetailView):
 
 
 class PlaylistCreateView(LoginRequiredMixin, CreateView):
-    model = Playlist
-    form_class = PlaylistForm
+    model         = Playlist
+    form_class    = PlaylistForm
     template_name = 'music/playlist_form.html'
-    success_url = reverse_lazy('music:playlist-list')
+    success_url   = reverse_lazy('music:playlist-list')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        # passo l'utente corrente al form
         kwargs['user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
-
+        # salva l'istanza principale
+        response = super().form_valid(form)
+        # salva i M2M (songs + shared_with)
+        return response
+    
 
 class PlaylistUpdateView(LoginRequiredMixin, UpdateView):
     model = Playlist
@@ -168,3 +175,13 @@ class GenreDeleteView(PermissionRequiredMixin, DeleteView):
     template_name = 'music/genre_confirm_delete.html'
     success_url = reverse_lazy('music:genre-list')
     permission_required = 'music.delete_genre'
+
+class PlaylistLeaveView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        playlist = get_object_or_404(Playlist, pk=pk)
+        if request.user in playlist.shared_with.all():
+            playlist.shared_with.remove(request.user)
+            messages.success(request, f"Hai lasciato la playlist “{playlist.name}”.")
+        else:
+            messages.warning(request, "Non puoi lasciare una playlist che non è condivisa con te.")
+        return redirect('music:playlist-list')

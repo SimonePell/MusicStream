@@ -24,9 +24,12 @@ class GenreForm(forms.ModelForm):
 
 class PlaylistForm(forms.ModelForm):
     shared_with = forms.ModelMultipleChoiceField(
-        queryset=User.objects.none(),  # verrà settato dinamicamente
+        queryset=User.objects.none(),
         required=False,
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.SelectMultiple(attrs={
+            'class': 'form-control select2',
+            'style': 'width: 100%;'
+        }),
         label="Condividi con"
     )
 
@@ -34,17 +37,13 @@ class PlaylistForm(forms.ModelForm):
         model = Playlist
         fields = ['name', 'songs', 'shared_with']
         widgets = {
-            'name': forms.TextInput(attrs={'placeholder': 'Titolo playlist'}),
-            'songs': forms.CheckboxSelectMultiple(),
-            'shared_with': forms.CheckboxSelectMultiple(),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Titolo playlist'}),
+            'songs': forms.SelectMultiple(attrs={'class': 'form-control select2', 'style': 'width: 100%;', 'size': 10}),
         }
 
     def __init__(self, *args, **kwargs):
-        # estrai user da kwargs se passato (vedi View più avanti)
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-
-        # popola la lista dei brani e degli utenti
         self.fields['songs'].queryset = Song.objects.all()
         if user:
             self.fields['shared_with'].queryset = User.objects.exclude(pk=user.pk)

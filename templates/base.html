@@ -6,88 +6,143 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Music Streaming Service{% endblock %}</title>
 
-  <!-- Bootstrap CSS da CDN -->
+  <!-- Bootstrap CSS -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     rel="stylesheet"
-    integrity="sha384-…"
     crossorigin="anonymous">
 
-  <!-- Il tuo CSS custom -->
+  <!-- Custom CSS -->
   <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+
+  <style>
+    /* Brand più grande */
+    .navbar-brand {
+      font-size: 2.5rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    /* Footer fisso */
+    .app-footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+    body {
+      padding-bottom: 60px; /* spazio per footer */
+    }
+  </style>
+  
 </head>
-<body>
-  <!-- Navbar comune -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="{% url 'music:song-list' %}">MusicService</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+<body class="bg-light">
+
+  <!-- NAVBAR con palette calda -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-warning shadow-sm">
+    <div class="container">
+      <!-- Brand solo testo -->
+      <a class="navbar-brand text-dark" href="{% url 'music:song-list' %}">
+        MusicService
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'music:song-list' %}">Brani</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'music:playlist-list' %}">Playlist</a>
-          </li>
+
+      <div class="collapse navbar-collapse" id="mainNav">
+        <!-- Left links -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link fs-5 text-dark" href="{% url 'music:song-list' %}">Brani</a></li>
+          <li class="nav-item"><a class="nav-link fs-5 text-dark" href="{% url 'music:playlist-list' %}">Playlist</a></li>
           {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'music:recommendation-list' %}">Raccomandazioni</a>
-            </li>
+            <li class="nav-item"><a class="nav-link fs-5 text-dark" href="{% url 'music:recommendation-list' %}">Raccomandazioni</a></li>
           {% endif %}
           {% if perms.music.add_song %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'music:song-add' %}">Aggiungi brano</a>
-            </li>
+            <li class="nav-item"><a class="nav-link fs-5 text-dark" href="{% url 'music:song-add' %}">Brano</a></li>
           {% endif %}
           {% if perms.music.add_genre %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'music:genre-add' %}">Aggiungi genere</a>
-            </li>
+            <li class="nav-item"><a class="nav-link fs-5 text-dark" href="{% url 'music:genre-add' %}">Genere</a></li>
           {% endif %}
         </ul>
-        <ul class="navbar-nav ms-auto">
+
+        <!-- Search form -->
+        <form class="d-flex me-3" method="get" action="{% url 'music:song-list' %}">
+          <input
+            class="form-control form-control-lg me-2"
+            name="q"
+            type="search"
+            placeholder="Cerca brani..."
+            aria-label="Cerca"
+            value="{{ request.GET.q|default:'' }}">
+          <button class="btn btn-dark btn-lg" type="submit">Cerca</button>
+        </form>
+
+        <!-- User menu -->
+        <ul class="navbar-nav mb-2 mb-lg-0">
           {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'accounts:profile' %}">{{ user.username }}</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle fs-5 text-dark"
+                href="#"
+                id="userDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+                {{ user.username }}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item fs-5" href="{% url 'accounts:profile' %}">Profilo</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item fs-5 text-danger" href="{% url 'accounts:logout' %}">Logout</a></li>
+              </ul>
             </li>
           {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'accounts:register' %}">Registrati</a>
-            </li>
+            <li class="nav-item"><a class="nav-link fs-5 text-dark" href="{% url 'accounts:login' %}">Login</a></li>
+            <li class="nav-item"><a class="nav-link fs-5 text-dark" href="{% url 'accounts:register' %}">Registrati</a></li>
           {% endif %}
         </ul>
       </div>
-    </div>
+    </div><!-- Select2 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet" />
+    
+    <!-- jQuery (dipendenza di Select2) -->
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJ+3hr/u07psOEz5R1JZgWj6kd7lU5MjrLk+I="
+      crossorigin="anonymous"></script>
+    
+    <!-- Select2 JS -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
   </nav>
 
-  <div class="container my-4">
+  <!-- CONTENUTO PRINCIPALE -->
+  <main class="container my-5">
+    <!-- Alerts -->
     {% if messages %}
       {% for msg in messages %}
-        <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ msg.tags }} alert-dismissible fade show fs-5" role="alert">
           {{ msg }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Chiudi"></button>
         </div>
       {% endfor %}
     {% endif %}
 
-    {% block content %}
-    <!-- Contenuto specifico di ciascuna pagina -->
-    {% endblock %}
-  </div>
+    {% block content %}{% endblock %}
+  </main>
 
-  <!-- Bootstrap JS da CDN -->
+  <!-- FOOTER caldo fissato -->
+  <footer class="app-footer bg-warning text-dark py-3">
+    <div class="container text-center fs-6">
+      &copy; {{ now.year }} MusicService • <a href="#" class="text-dark">Termini</a> • <a href="#" class="text-dark">Privacy</a>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-…"
     crossorigin="anonymous"></script>
 </body>
 </html>

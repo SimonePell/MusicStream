@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     SongListView, SongDetailView, SongCreateView, SongUpdateView, SongDeleteView,
     GenreListView, GenreCreateView, GenreUpdateView, GenreDeleteView,
-    PlaylistListView, PlaylistDetailView, PlaylistCreateView, PlaylistUpdateView, PlaylistDeleteView,
+    PlaylistListView, PlaylistDetailView, PlaylistCreateView, PlaylistUpdateView, PlaylistDeleteView, PlaylistLeaveView,
     RecommendationListView
 )
 
@@ -29,6 +29,7 @@ urlpatterns = [
     path('playlists/<int:pk>/', PlaylistDetailView.as_view(), name='playlist-detail'),
     path('playlists/<int:pk>/edit/', PlaylistUpdateView.as_view(), name='playlist-edit'),
     path('playlists/<int:pk>/delete/', PlaylistDeleteView.as_view(), name='playlist-delete'),
+    path('playlists/<int:pk>/leave/', PlaylistLeaveView.as_view(), name='playlist-leave'),
 
     # Recommendations
     path('recommendations/', RecommendationListView.as_view(), name='recommendation-list'),
