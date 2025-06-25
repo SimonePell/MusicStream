@@ -2,7 +2,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 
-from .models import Song, Genre, Playlist
+from .models import Song, Genre, Playlist, Recommendation
 from .forms import SongForm, GenreForm, PlaylistForm
 
 class SongListView(ListView):
@@ -91,3 +91,13 @@ class PlaylistDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         return Playlist.objects.filter(owner=self.request.user)
+
+class RecommendationListView(LoginRequiredMixin, ListView):
+    model = Recommendation
+    template_name = 'music/recommendation_list.html'
+    context_object_name = 'recommendations'
+    paginate_by = 20
+
+    def get_queryset(self):
+        # Restituisce le raccomandazioni solo per l'utente corrente
+        return Recommendation.objects.filter(user=self.request.user)

@@ -1,9 +1,22 @@
 <!-- templates/music/playlist_form.html -->
 {% extends 'base.html' %}
-{% block title %}{{ view.object.name if view.object else 'Nuova Playlist' }}{% endblock %}
+{% block title %}
+  {% if view.object %}
+    {{ view.object.name }}
+  {% else %}
+    Nuova Playlist
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-  <h2>{{ view.object.name if view.object else 'Crea una nuova playlist' }}</h2>
+  <h2>
+    {% if view.object %}
+      {{ view.object.name }}
+    {% else %}
+      Crea una nuova playlist
+    {% endif %}
+  </h2>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

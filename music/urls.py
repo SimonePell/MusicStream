@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     SongListView, SongDetailView, SongCreateView, SongUpdateView, SongDeleteView,
     GenreCreateView,
-    PlaylistListView, PlaylistDetailView, PlaylistCreateView, PlaylistUpdateView, PlaylistDeleteView
+    PlaylistListView, PlaylistDetailView, PlaylistCreateView, PlaylistUpdateView, PlaylistDeleteView,
+    RecommendationListView
 )
 
 app_name = 'music'
@@ -24,4 +25,8 @@ urlpatterns = [
     path('playlists/<int:pk>/', PlaylistDetailView.as_view(), name='playlist-detail'),
     path('playlists/<int:pk>/edit/', PlaylistUpdateView.as_view(), name='playlist-edit'),
     path('playlists/<int:pk>/delete/', PlaylistDeleteView.as_view(), name='playlist-delete'),
+
+    # Recommendations
+    path('recommendations/', RecommendationListView.as_view(), name='recommendation-list'),
+
 ]
