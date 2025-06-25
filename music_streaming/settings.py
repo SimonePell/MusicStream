@@ -1,102 +1,64 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
-# 1) Base directory del progetto
+import dj_database_url
+import environ
+
+# 1) Base dir
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2) Sicurezza
-SECRET_KEY = 'django-insecure-[LA_TUA_SECRET_KEY_QUI]'
-DEBUG = True
-ALLOWED_HOSTS = []  # In produzione inserisci i tuoi host/domain
+# 2) Carica il .env solo in locale (Railway non avrà un file .env)
+if not os.environ.get("RAILWAY_ENVIRONMENT"):
+    environ.Env.read_env()
 
-# 3) Applicazioni installate
+# 3) Env con casting e default
+env = environ.Env(
+    DEBUG=(bool, False),
+)
+
+# 4) Sicurezza
+SECRET_KEY     = env("DJANGO_SECRET_KEY")
+DEBUG          = env("DEBUG")
+ALLOWED_HOSTS  = env.list("DJANGO_ALLOWED_HOSTS", default=[])
+
+# 5) Installed apps, middleware, ecc.
 INSTALLED_APPS = [
-    # Django core
     'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-
-    # Le tue app
-    'accounts',    # autenticazione, profili e gruppi
-    'music',       # canzoni, generi, playlist, raccomandazioni
+    # ...
+    'accounts',
+    'music',
 ]
 
-# 4) Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # ...
 ]
 
-# 5) URL dispatcher
 ROOT_URLCONF = 'music_streaming.urls'
-
-# 6) Template engine + Bootstrap static
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # cartella per template globali
-        'APP_DIRS': True,                  # cerca template in ogni app sotto templates/
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-# 7) WSGI e ASGI entrypoints
 WSGI_APPLICATION = 'music_streaming.wsgi.application'
 ASGI_APPLICATION = 'music_streaming.asgi.application'
 
-# 8) Database: PostgreSQL
+# 6) Database: usa sempre DATABASE_URL iniettata da Railway
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'musicdb',
-        'USER': 'musicuser',
-        'PASSWORD': '1TierPol9!',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        ssl_require=not DEBUG
+    )
 }
 
-# 9) Password validators
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
-# 10) Internazionalizzazione
+# 7) Internationalization, static, ecc.
 LANGUAGE_CODE = 'it-it'
-TIME_ZONE = 'Europe/Rome'
-USE_I18N = True
-USE_TZ = True
+TIME_ZONE     = 'Europe/Rome'
+USE_I18N      = True
+USE_TZ        = True
 
-# 11) Static files (CSS, JS, immagini)
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']       # sviluppo
-# STATIC_ROOT = BASE_DIR / 'staticfiles'       # in produzione con collectstatic
-
-# 12) Default primary key field type
+STATIC_URL       = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 13) Modello User personalizzato
-AUTH_USER_MODEL = 'accounts.User'
-
-# 14) URL login/logout di comodo
-LOGIN_URL = 'accounts:login'
-LOGIN_REDIRECT_URL = 'music:song-list'
+# 8) Auth URLs
+AUTH_USER_MODEL     = 'accounts.User'
+LOGIN_URL           = 'accounts:login'
+LOGIN_REDIRECT_URL  = 'music:song-list'
 LOGOUT_REDIRECT_URL = 'accounts:login'
