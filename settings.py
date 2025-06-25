@@ -1,5 +1,6 @@
 import environ
 from pathlib import Path
+import dj_database_url
 
 # 1) Legge il .env nella root
 env = environ.Env(
@@ -45,15 +46,12 @@ WSGI_APPLICATION = 'music_streaming.wsgi.application'
 ASGI_APPLICATION = 'music_streaming.asgi.application'
 
 # 5) Database
+
 DATABASES = {
-    'default': {
-        'ENGINE':   env('DB_ENGINE'),
-        'NAME':     env('DB_NAME'),
-        'USER':     env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST':     env('DB_HOST'),
-        'PORT':     env('DB_PORT'),
-    }
+    'default': dj_database_url.config(
+        default=env('DATABASE_URL'),
+        conn_max_age=600,
+    )
 }
 
 # 6) Validators, Internationalization, Static, ecc.
