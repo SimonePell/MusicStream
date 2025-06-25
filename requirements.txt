@@ -3,3 +3,4 @@ psycopg2-binary
 dj-database-url>=1.0.0
 gunicorn
 whitenoise
+django-environ
