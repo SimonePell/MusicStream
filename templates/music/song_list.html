@@ -1,15 +1,57 @@
 {% extends 'base.html' %}
+{% block title %}Catalogo Canzoni{% endblock %}
+
 {% block content %}
-  <h1>Le tue Playlist</h1>
-  <div class="mb-3">
-    <a href="{% url 'music:playlist-add' %}" class="btn btn-success">Nuova Playlist</a>
-  </div>
-  <ul>
+<div class="container mt-4">
+  <h1>Catalogo Canzoni</h1>
+
+  <!-- Form di ricerca e filtro -->
+  <form method="get" class="d-flex mb-4">
+    <input
+      type="text"
+      name="q"
+      value="{{ request.GET.q }}"
+      class="form-control me-2"
+      placeholder="Cerca per titolo o artista…" />
+    <select name="genre" class="form-select me-2">
+      <option value="">Tutti i generi</option>
+      {% for g in genres %}
+        <option value="{{ g.name }}" {% if request.GET.genre == g.name %}selected{% endif %}>
+          {{ g.name }}
+        </option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-primary">Cerca</button>
+  </form>
+
+  <!-- Elenco canzoni -->
+  <ul class="list-group">
     {% for song in songs %}
-      <li>
-        {{ song.title }} — {{ song.artist }}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ song.title }}</strong> — {{ song.artist }}
+          <span class="badge bg-secondary ms-2">{{ song.genre.name }}</span>
+        </div>
+        {% if perms.music.change_song or perms.music.delete_song %}
+          <div class="btn-group btn-group-sm">
+            {% if perms.music.change_song %}
+              <a href="{% url 'music:song-edit' song.pk %}" class="btn btn-outline-warning">Modifica</a>
+            {% endif %}
+            {% if perms.music.delete_song %}
+              <a href="{% url 'music:song-delete' song.pk %}" class="btn btn-outline-danger">Elimina</a>
+            {% endif %}
+          </div>
+        {% endif %}
       </li>
+    {% empty %}
+      <li class="list-group-item">Nessuna canzone trovata.</li>
     {% endfor %}
   </ul>
-  
+
+  {% if perms.music.add_song %}
+    <div class="mt-4">
+      <a href="{% url 'music:song-add' %}" class="btn btn-success">Aggiungi Nuova Canzone</a>
+    </div>
+  {% endif %}
+</div>
 {% endblock %}

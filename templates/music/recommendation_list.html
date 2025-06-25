@@ -1,37 +1,50 @@
-{# templates/music/recommendation_list.html #}
 {% extends 'base.html' %}
 {% block title %}Raccomandazioni{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
   <h1>Raccomandazioni per te</h1>
-  <ul>
+
+  <!-- Optional: ricerca su titolo canzone nelle raccomandazioni -->
+  <form method="get" class="d-flex mb-4">
+    <input
+      type="text"
+      name="q"
+      value="{{ request.GET.q }}"
+      class="form-control me-2"
+      placeholder="Cerca raccomandazioni per titolo…" />
+    <button class="btn btn-outline-primary">Cerca</button>
+  </form>
+
+  <ul class="list-group">
     {% for rec in recommendations %}
-      <li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
         <a href="{% url 'music:song-detail' rec.song.pk %}">
-          {{ rec.song.title }} – {{ rec.song.artist }}
+          {{ rec.song.title }} — {{ rec.song.artist }}
         </a>
         <span class="badge bg-info ms-2">Score: {{ rec.score }}</span>
       </li>
     {% empty %}
-      <li>Non ci sono raccomandazioni disponibili al momento.</li>
+      <li class="list-group-item">Non ci sono raccomandazioni disponibili al momento.</li>
     {% endfor %}
   </ul>
+
   {% if is_paginated %}
-    <nav>
+    <nav class="mt-4">
       <ul class="pagination">
         {% if page_obj.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo; Precedente</a>
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{request.GET.q}}{% endif %}">&laquo; Precedente</a>
           </li>
         {% endif %}
         {% for num in paginator.page_range %}
-          <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{request.GET.q}}{% endif %}">{{ num }}</a>
           </li>
         {% endfor %}
         {% if page_obj.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Successiva &raquo;</a>
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{request.GET.q}}{% endif %}">Successiva &raquo;</a>
           </li>
         {% endif %}
       </ul>

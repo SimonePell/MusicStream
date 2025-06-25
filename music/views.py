@@ -20,6 +20,11 @@ class SongListView(ListView):
             qs = qs.filter(genre__name=genre)
         return qs
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['genres'] = Genre.objects.all()
+        return ctx
+
 class SongDetailView(DetailView):
     model = Song
     template_name = 'music/song_detail.html'
@@ -71,9 +76,29 @@ class PlaylistCreateView(LoginRequiredMixin, CreateView):
     template_name = 'music/playlist_form.html'
     success_url = reverse_lazy('music:playlist-list')
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['genres'] = Genre.objects.all()
+        return ctx
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Prendi parametri di ricerca
+        q = self.request.GET.get('q', '')
+        genre = self.request.GET.get('genre', '')
+        # Costruisci queryset di Song filtrato
+        qs = Song.objects.all()
+        if q:
+            qs = qs.filter(title__icontains=q) | qs.filter(artist__icontains=q)
+        if genre:
+            qs = qs.filter(genre__name=genre)
+        form.fields['songs'].queryset = qs
+        return form
+
     def form_valid(self, form):
         form.instance.owner = self.request.user
         return super().form_valid(form)
+
 
 class PlaylistUpdateView(LoginRequiredMixin, UpdateView):
     model = Playlist
@@ -83,6 +108,24 @@ class PlaylistUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_queryset(self):
         return Playlist.objects.filter(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['genres'] = Genre.objects.all()
+        return ctx
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        q = self.request.GET.get('q', '')
+        genre = self.request.GET.get('genre', '')
+        qs = Song.objects.all()
+        if q:
+            qs = qs.filter(title__icontains=q) | qs.filter(artist__icontains=q)
+        if genre:
+            qs = qs.filter(genre__name=genre)
+        form.fields['songs'].queryset = qs
+        return form
+
 
 class PlaylistDeleteView(LoginRequiredMixin, DeleteView):
     model = Playlist
@@ -99,5 +142,8 @@ class RecommendationListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        # Restituisce le raccomandazioni solo per l'utente corrente
-        return Recommendation.objects.filter(user=self.request.user)
+        qs = Recommendation.objects.filter(user=self.request.user)
+        q = self.request.GET.get('q')
+        if q:
+            qs = qs.filter(song__title__icontains=q)
+        return qs

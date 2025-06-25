@@ -1,27 +1,80 @@
-<!-- templates/music/playlist_form.html -->
+{# templates/music/playlist_form.html #}
 {% extends 'base.html' %}
+
 {% block title %}
-  {% if view.object %}
-    {{ view.object.name }}
-  {% else %}
-    Nuova Playlist
-  {% endif %}
+  {% if view.object %}Modifica Playlist{% else %}Nuova Playlist{% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-  <h2>
-    {% if view.object %}
-      {{ view.object.name }}
-    {% else %}
-      Crea una nuova playlist
-    {% endif %}
-  </h2>
+  <h1 class="mb-3">
+    {% if view.object %}Modifica Playlist{% else %}Nuova Playlist{% endif %}
+  </h1>
+
+  {# — Barra di ricerca e filtro — #}
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-md-5">
+      <input
+        type="text"
+        name="q"
+        value="{{ request.GET.q }}"
+        class="form-control"
+        placeholder="Cerca per titolo o artista…" />
+    </div>
+    <div class="col-md-4">
+      <select name="genre" class="form-select">
+        <option value="">Tutti i generi</option>
+        {% for g in genres %}
+          <option value="{{ g.name }}" {% if request.GET.genre == g.name %}selected{% endif %}>
+            {{ g.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-outline-primary w-100">Filtra Brani</button>
+    </div>
+  </form>
+
+  {# — Form principale — #}
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Salva</button>
-    <a href="{% url 'music:playlist-list' %}" class="btn btn-secondary">Annulla</a>
+    {{ form.non_field_errors }}
+
+    {# — Finestra scrollabile con i checkbox delle canzoni — #}
+    <div class="mb-4">
+      <label class="form-label">{{ form.songs.label }}</label>
+      <div class="border p-2" style="max-height: 300px; overflow-y: auto;">
+        {% for song in form.fields.songs.queryset %}
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="songs"
+              id="song_{{ song.pk }}"
+              value="{{ song.pk }}"
+              {% if song in form.instance.songs.all %}checked{% endif %}>
+            <label class="form-check-label" for="song_{{ song.pk }}">
+              <strong>{{ song.title }}</strong> — {{ song.artist }}
+              <span class="badge bg-secondary ms-2">{{ song.genre.name }}</span>
+            </label>
+          </div>
+        {% endfor %}
+      </div>
+      {{ form.songs.errors }}
+    </div>
+
+    {# — Campo nome playlist — #}
+    <div class="mb-3">
+      {{ form.name.label_tag }}
+      {{ form.name }}
+      {{ form.name.errors }}
+    </div>
+
+    <button class="btn btn-primary">
+      {% if view.object %}Salva Modifiche{% else %}Crea Playlist{% endif %}
+    </button>
+    <a href="{% url 'music:playlist-list' %}" class="btn btn-secondary ms-2">Annulla</a>
   </form>
 </div>
 {% endblock %}
