@@ -33,5 +33,4 @@ urlpatterns = [
 
     # Recommendations
     path('recommendations/', RecommendationListView.as_view(), name='recommendation-list'),
-
 ]

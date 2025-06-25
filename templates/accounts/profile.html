@@ -1,11 +1,38 @@
 {% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Il mio profilo{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5" style="max-width: 600px;">
   <h2>Profilo di {{ request.user.username }}</h2>
-  <form method="post">
+
+  <ul class="list-group mb-4">
+    <li class="list-group-item"><strong>Email:</strong> {{ request.user.email }}</li>
+    <li class="list-group-item">
+      <strong>Iscritto il:</strong> 
+      {{ request.user.date_joined|date:"d/m/Y H:i" }}
+    </li>
+    <li class="list-group-item">
+      <strong>Bio:</strong><br>
+      {{ form.instance.bio|default:"(nessuna descrizione)" }}
+    </li>
+    <li class="list-group-item">
+      <strong>Playlist create:</strong> {{ num_playlists|intcomma }}
+    </li>
+    <li class="list-group-item">
+      <strong>Canzoni create:</strong> {{ num_songs|intcomma }}
+    </li>
+  </ul>
+
+  <h3>Aggiorna la tua descrizione</h3>
+  <form method="post" class="mb-5">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Aggiorna Profilo</button>
+    {{ form.bio.label_tag }}<br>
+    {{ form.bio }}
+    {% if form.bio.errors %}
+      <div class="text-danger">{{ form.bio.errors }}</div>
+    {% endif %}
+    <button type="submit" class="btn btn-success mt-2">Aggiorna Profilo</button>
   </form>
 </div>
 {% endblock %}

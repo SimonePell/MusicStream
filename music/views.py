@@ -2,7 +2,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.views import View
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
@@ -130,17 +130,32 @@ class PlaylistDeleteView(LoginRequiredMixin, DeleteView):
         # solo le proprie playlist
         return Playlist.objects.filter(owner=self.request.user)
 
+
+
 class RecommendationListView(LoginRequiredMixin, ListView):
-    model = Recommendation
+    model = Song
     template_name = 'music/recommendation_list.html'
     context_object_name = 'recommendations'
     paginate_by = 20
 
     def get_queryset(self):
-        qs = Recommendation.objects.filter(user=self.request.user)
+        user = self.request.user
+        # prendi tutte le playlist proprie o condivise
+        playlists = Playlist.objects.filter(
+            Q(owner=user) | Q(shared_with=user)
+        )
+        # filtra i brani presenti in quelle playlist e conta in quante playlist
+        qs = (
+            Song.objects
+                .filter(playlists__in=playlists)
+                .annotate(score=Count('playlists'))
+                .order_by('-score', 'title')
+                .distinct()
+        )
+        # applica eventuale ricerca
         q = self.request.GET.get('q')
         if q:
-            qs = qs.filter(song__title__icontains=q)
+            qs = qs.filter(title__icontains=q)
         return qs
 
 # Lista generi (view per Curator e Listener – entrambi possono vedere i generi)

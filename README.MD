@@ -16,6 +16,7 @@ Un’applicazione web di streaming musicale realizzata con Django 4.2.
   - CRUD playlist: selezione brani in un pannello scrollabile, condivisione con altri utenti.  
   - Raccomandazioni personalizzate ordinate per score.  
   - CRUD generi (solo Curator).  
+- **Profilo utente**: modifica la propria bio e visualizza statistiche di brani e playlist.
 - **Stack**: Python 3.10+, Django ≥4.2, PostgreSQL (opzionale), Bootstrap 5.
 
 ---
@@ -33,10 +34,16 @@ Un’applicazione web di streaming musicale realizzata con Django 4.2.
    source venv/bin/activate
 
    pip install -r requirements.txt
+
+   copia .env.example in .env con:
+   DJANGO_SECRET_KEY=tuo_secret_key
+  DEBUG=True
+  DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
+  DATABASE_URL=postgresql://user:pass@localhost:5432/musicdb
    
    python manage.py migrate
 
-   python manage.py loaddata initial_data.json
+   python manage.py seed_demo
 
    python manage.py createsuperuser
 
@@ -54,3 +61,18 @@ Gestione generi: lista, aggiunta, modifica, cancellazione (solo Curator).
 
 Profilo utente: visualizzazione dati e lista delle proprie playlist.
   
+##  Credenziali Demo
+
+Listener:
+
+Username: demo_listener1
+
+Password: pass1234
+
+Curator:
+
+Username: demo_curator1
+
+Password: pass1234
+
+ https://musicstream-production.up.railway.app/

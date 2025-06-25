@@ -1,17 +1,14 @@
+{# music/templates/music/song_form.html #}
 {% extends 'base.html' %}
-
 {% block title %}
   <h2 class="fs-5 mb-4">
-    {% if view.object %}
-      Modifica Canzone: {{ view.object.title }}
-    {% else %}
-      Nuova Canzone
-    {% endif %}
+    {% if view.object %}Modifica Canzone: {{ view.object.title }}
+    {% else %}Nuova Canzone{% endif %}
   </h2>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4" style="max-width: 600px;">
+<div class="container mt-4" style="max-width:600px;">
   <form method="post" class="row g-3">
     {% csrf_token %}
     {{ form.non_field_errors }}
@@ -19,45 +16,21 @@
     <!-- Titolo -->
     <div class="col-12">
       <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">Titolo</label>
-      <input
-        type="text"
-        name="title"
-        id="{{ form.title.id_for_label }}"
-        value="{{ form.title.value|default_if_none:'' }}"
-        class="form-control form-control-lg"
-        placeholder="Inserisci titolo…">
+      {{ form.title }}
       {{ form.title.errors }}
     </div>
 
     <!-- Genere -->
     <div class="col-12">
       <label for="{{ form.genre.id_for_label }}" class="form-label fw-bold">Genere</label>
-      <select
-        name="genre"
-        id="{{ form.genre.id_for_label }}"
-        class="form-select form-select-lg">
-        <option value="">---------</option>
-        {% for g in form.fields.genre.queryset %}
-          <option value="{{ g.pk }}"
-            {% if form.genre.value|stringformat:"s" == g.pk|stringformat:"s" %}selected{% endif %}>
-            {{ g.name }}
-          </option>
-        {% endfor %}
-      </select>
+      {{ form.genre }}
       {{ form.genre.errors }}
     </div>
 
-    <!-- Durata in minuti -->
+    <!-- Durata -->
     <div class="col-12">
       <label for="{{ form.duration_min.id_for_label }}" class="form-label fw-bold">Durata (minuti)</label>
-      <input
-        type="number"
-        name="duration_min"
-        id="{{ form.duration_min.id_for_label }}"
-        value="{{ form.duration_min.value|default_if_none:'' }}"
-        class="form-control form-control-lg"
-        min="0"
-        placeholder="Es. 3">
+      {{ form.duration_min }}
       {{ form.duration_min.errors }}
     </div>
 

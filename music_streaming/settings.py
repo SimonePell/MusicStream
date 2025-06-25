@@ -3,17 +3,13 @@ from pathlib import Path
 
 import dj_database_url
 
-# BASE DIR
+ # BASE DIR
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# —————————————————————————————————————————
-# 1) Caricamento .env in locale (opzionale)
-# Railway non avrà mai un file .env, quindi
-# questa parte verrà eseguita solo sulla tua macchina
-if os.path.exists(BASE_DIR / ".env"):
+
+if not os.environ.get("RAILWAY_ENVIRONMENT"):
     from dotenv import load_dotenv
     load_dotenv(BASE_DIR / ".env")
-# —————————————————————————————————————————
 
 # 2) Sicurezza e Debug
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
@@ -33,8 +29,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django.contrib.humanize',
     # le tue app
-    "accounts",
+    'accounts.apps.AccountsConfig',
     "music",
 ]
 
@@ -79,8 +76,8 @@ ASGI_APPLICATION = "music_streaming.asgi.application"
 # 6) DATABASES: usa SEMPRE la DATABASE_URL di Railway
 #   Imposta in Variables → Add Reference → DATABASE_URL dal tuo Postgres
 DATABASES = {
-    "default": dj_database_url.parse(
-        os.environ["DATABASE_URL"],
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
         ssl_require=not DEBUG,
     )

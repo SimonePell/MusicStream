@@ -1,9 +1,5 @@
-{# templates/music/recommendation_list.html #}
 {% extends 'base.html' %}
-{% load static %}
-
 {% block title %}Le tue Raccomandazioni{% endblock %}
-
 {% block content %}
   <h1>Raccomandazioni per {{ request.user.username }}</h1>
 
@@ -21,25 +17,29 @@
     </div>
   </form>
 
-  <ul class="list-group mb-4">
-    {% for rec in recommendations %}
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-          <strong>{{ rec.song.title }}</strong> — {{ rec.song.artist }}
-        </div>
-        <span class="badge bg-secondary rounded-pill">{{ rec.score }}</span>
-      </li>
-    {% empty %}
-      <li class="list-group-item">Nessuna raccomandazione disponibile.</li>
-    {% endfor %}
-  </ul>
+  {% if recommendations %}
+    <ul class="list-group mb-4">
+      {% for song in recommendations %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ song.title }}</strong> — {{ song.artist }}
+          </div>
+          <span class="badge bg-secondary rounded-pill">{{ song.score }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-info">
+      Ancora nessuna raccomandazione: crea o condividi playlist!
+    </div>
+  {% endif %}
 
   {% if is_paginated %}
     <nav aria-label="Paginazione raccomandazioni">
       <ul class="pagination">
         {% if page_obj.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous">
+            <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}">
               &laquo;
             </a>
           </li>
@@ -55,7 +55,7 @@
 
         {% if page_obj.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next">
+            <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}">
               &raquo;
             </a>
           </li>
@@ -65,5 +65,4 @@
       </ul>
     </nav>
   {% endif %}
-
 {% endblock %}
