@@ -3,21 +3,29 @@ from pathlib import Path
 
 import dj_database_url
 
-# 1) Base directory del progetto
+# BASE DIR
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2) Caricamento variabili d’ambiente da .env in locale
-#    In produzione Railway non avrà un file .env
-if not os.environ.get("RAILWAY_ENVIRONMENT"):
+# —————————————————————————————————————————
+# 1) Caricamento .env in locale (opzionale)
+# Railway non avrà mai un file .env, quindi
+# questa parte verrà eseguita solo sulla tua macchina
+if os.path.exists(BASE_DIR / ".env"):
     from dotenv import load_dotenv
     load_dotenv(BASE_DIR / ".env")
+# —————————————————————————————————————————
 
-# 3) Sicurezza
+# 2) Sicurezza e Debug
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 DEBUG = os.environ.get("DEBUG", "False").lower() in ("1", "true", "yes")
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
 
-# 4) Applicazioni installate
+# 3) ALLOWED_HOSTS
+# Puoi mettere un singolo dominio o separare con virgole:
+#   DJANGO_ALLOWED_HOSTS=railway.app,localhost
+hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
+ALLOWED_HOSTS = [h.strip() for h in hosts.split(",") if h.strip()]
+
+# 4) Installed apps
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -25,7 +33,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # tue app
+    # le tue app
     "accounts",
     "music",
 ]
@@ -63,29 +71,22 @@ TEMPLATES = [
 WSGI_APPLICATION = "music_streaming.wsgi.application"
 ASGI_APPLICATION = "music_streaming.asgi.application"
 
-# 6) Database (usa sempre DATABASE_URL di Railway)
+# 6) DATABASES: usa SEMPRE la DATABASE_URL di Railway
+#   Imposta in Variables → Add Reference → DATABASE_URL dal tuo Postgres
 DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+    "default": dj_database_url.parse(
+        os.environ["DATABASE_URL"],
         conn_max_age=600,
         ssl_require=not DEBUG,
     )
 }
 
-# 7) Password validation
+# 7) Validators
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 # 8) Internazionalizzazione
@@ -95,16 +96,16 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# 9) Static files & media
+# 9) Static files
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# 10) Default primary key field
+# 10) Default PK
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# 11) Autenticazione
+# 11) Auth redirects
 AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "music:song-list"
