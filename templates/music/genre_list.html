@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Gestione Generi{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Generi Musicali</h1>
+    {% if perms.music.add_genre %}
+      <a href="{% url 'music:genre-add' %}" class="btn btn-success">Nuovo Genere</a>
+    {% endif %}
+  </div>
+
+  <ul class="list-group">
+    {% for g in genres %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ g.name }}
+        <div class="btn-group btn-group-sm">
+          {% if perms.music.change_genre %}
+            <a href="{% url 'music:genre-edit' g.pk %}" class="btn btn-outline-warning">Modifica</a>
+          {% endif %}
+          {% if perms.music.delete_genre %}
+            <a href="{% url 'music:genre-delete' g.pk %}" class="btn btn-outline-danger">Elimina</a>
+          {% endif %}
+        </div>
+      </li>
+    {% empty %}
+      <li class="list-group-item">Non ci sono generi.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

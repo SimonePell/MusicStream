@@ -20,17 +20,14 @@ class Playlist(models.Model):
     owner      = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='playlists')
     songs      = models.ManyToManyField(Song, blank=True, related_name='playlists')
     created_at = models.DateTimeField(auto_now_add=True)
+    shared_with = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name='shared_playlists'
+    )
 
     def __str__(self):
         return f"{self.name} by {self.owner.username}"
-
-class Recommendation(models.Model):
-    user  = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='recommendations')
-    song  = models.ForeignKey(Song, on_delete=models.CASCADE)
-    score = models.FloatField(default=0)
-
-    class Meta:
-        unique_together = ('user', 'song')
 
 class Recommendation(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='recommendations')

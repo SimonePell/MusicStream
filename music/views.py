@@ -1,9 +1,12 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
+from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 from .models import Song, Genre, Playlist, Recommendation
 from .forms import SongForm, GenreForm, PlaylistForm
+
 
 class SongListView(ListView):
     model = Song
@@ -63,12 +66,18 @@ class PlaylistListView(LoginRequiredMixin, ListView):
     context_object_name = 'playlists'
 
     def get_queryset(self):
-        return Playlist.objects.filter(owner=self.request.user)
+        user = self.request.user
+        # owner O condivise con l’utente
+        return Playlist.objects.filter(
+            Q(owner=user) | Q(shared_with=user)
+        ).distinct()
+
 
 class PlaylistDetailView(LoginRequiredMixin, DetailView):
     model = Playlist
     template_name = 'music/playlist_detail.html'
     context_object_name = 'playlist'
+
 
 class PlaylistCreateView(LoginRequiredMixin, CreateView):
     model = Playlist
@@ -76,24 +85,10 @@ class PlaylistCreateView(LoginRequiredMixin, CreateView):
     template_name = 'music/playlist_form.html'
     success_url = reverse_lazy('music:playlist-list')
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['genres'] = Genre.objects.all()
-        return ctx
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # Prendi parametri di ricerca
-        q = self.request.GET.get('q', '')
-        genre = self.request.GET.get('genre', '')
-        # Costruisci queryset di Song filtrato
-        qs = Song.objects.all()
-        if q:
-            qs = qs.filter(title__icontains=q) | qs.filter(artist__icontains=q)
-        if genre:
-            qs = qs.filter(genre__name=genre)
-        form.fields['songs'].queryset = qs
-        return form
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -109,22 +104,14 @@ class PlaylistUpdateView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         return Playlist.objects.filter(owner=self.request.user)
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['genres'] = Genre.objects.all()
-        return ctx
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        q = self.request.GET.get('q', '')
-        genre = self.request.GET.get('genre', '')
-        qs = Song.objects.all()
-        if q:
-            qs = qs.filter(title__icontains=q) | qs.filter(artist__icontains=q)
-        if genre:
-            qs = qs.filter(genre__name=genre)
-        form.fields['songs'].queryset = qs
-        return form
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 class PlaylistDeleteView(LoginRequiredMixin, DeleteView):
@@ -133,6 +120,7 @@ class PlaylistDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('music:playlist-list')
 
     def get_queryset(self):
+        # solo le proprie playlist
         return Playlist.objects.filter(owner=self.request.user)
 
 class RecommendationListView(LoginRequiredMixin, ListView):
@@ -147,3 +135,36 @@ class RecommendationListView(LoginRequiredMixin, ListView):
         if q:
             qs = qs.filter(song__title__icontains=q)
         return qs
+
+# Lista generi (view per Curator e Listener – entrambi possono vedere i generi)
+class GenreListView(PermissionRequiredMixin, ListView):
+    model = Genre
+    template_name = 'music/genre_list.html'
+    context_object_name = 'genres'
+    permission_required = 'music.view_genre'
+
+
+# Creazione (già esistente)
+class GenreCreateView(PermissionRequiredMixin, CreateView):
+    model = Genre
+    form_class = GenreForm
+    template_name = 'music/genre_form.html'
+    success_url = reverse_lazy('music:genre-list')
+    permission_required = 'music.add_genre'
+
+
+# Modifica
+class GenreUpdateView(PermissionRequiredMixin, UpdateView):
+    model = Genre
+    form_class = GenreForm
+    template_name = 'music/genre_form.html'
+    success_url = reverse_lazy('music:genre-list')
+    permission_required = 'music.change_genre'
+
+
+# Eliminazione
+class GenreDeleteView(PermissionRequiredMixin, DeleteView):
+    model = Genre
+    template_name = 'music/genre_confirm_delete.html'
+    success_url = reverse_lazy('music:genre-list')
+    permission_required = 'music.delete_genre'

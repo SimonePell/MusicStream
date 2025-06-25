@@ -1,28 +1,20 @@
 {% extends 'base.html' %}
-
-{% block title %}Le Tue Playlist{% endblock %}
-
+{% block title %}Le mie playlist{% endblock %}
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>Le Tue Playlist</h1>
+  <h1>Le tue playlist</h1>
+  <div class="mb-3">
     <a href="{% url 'music:playlist-add' %}" class="btn btn-success">Nuova Playlist</a>
   </div>
-
   <ul class="list-group">
     {% for pl in playlists %}
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <a href="{% url 'music:playlist-detail' pl.pk %}">{{ pl.name }}</a>
-        {% if pl.owner == user %}
-          <div class="btn-group btn-group-sm">
-            <a href="{% url 'music:playlist-edit' pl.pk %}" class="btn btn-outline-warning">Modifica</a>
-            <a href="{% url 'music:playlist-delete' pl.pk %}" class="btn btn-outline-danger">Elimina</a>
-          </div>
-        {% endif %}
+        <span class="badge bg-secondary">
+          Condivisa con: {{ pl.shared_with.count }}
+        </span>
       </li>
     {% empty %}
       <li class="list-group-item">Non hai ancora playlist.</li>
     {% endfor %}
   </ul>
-</div>
 {% endblock %}

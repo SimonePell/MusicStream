@@ -1,54 +1,69 @@
+{# templates/music/recommendation_list.html #}
 {% extends 'base.html' %}
-{% block title %}Raccomandazioni{% endblock %}
+{% load static %}
+
+{% block title %}Le tue Raccomandazioni{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <h1>Raccomandazioni per te</h1>
+  <h1>Raccomandazioni per {{ request.user.username }}</h1>
 
-  <!-- Optional: ricerca su titolo canzone nelle raccomandazioni -->
-  <form method="get" class="d-flex mb-4">
-    <input
-      type="text"
-      name="q"
-      value="{{ request.GET.q }}"
-      class="form-control me-2"
-      placeholder="Cerca raccomandazioni per titolo…" />
-    <button class="btn btn-outline-primary">Cerca</button>
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+      <input
+        type="text"
+        name="q"
+        value="{{ request.GET.q|default_if_none:'' }}"
+        class="form-control"
+        placeholder="Cerca nel titolo del brano…">
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary">Cerca</button>
+    </div>
   </form>
 
-  <ul class="list-group">
+  <ul class="list-group mb-4">
     {% for rec in recommendations %}
       <li class="list-group-item d-flex justify-content-between align-items-center">
-        <a href="{% url 'music:song-detail' rec.song.pk %}">
-          {{ rec.song.title }} — {{ rec.song.artist }}
-        </a>
-        <span class="badge bg-info ms-2">Score: {{ rec.score }}</span>
+        <div>
+          <strong>{{ rec.song.title }}</strong> — {{ rec.song.artist }}
+        </div>
+        <span class="badge bg-secondary rounded-pill">{{ rec.score }}</span>
       </li>
     {% empty %}
-      <li class="list-group-item">Non ci sono raccomandazioni disponibili al momento.</li>
+      <li class="list-group-item">Nessuna raccomandazione disponibile.</li>
     {% endfor %}
   </ul>
 
   {% if is_paginated %}
-    <nav class="mt-4">
+    <nav aria-label="Paginazione raccomandazioni">
       <ul class="pagination">
         {% if page_obj.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{request.GET.q}}{% endif %}">&laquo; Precedente</a>
+            <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous">
+              &laquo;
+            </a>
           </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
         {% endif %}
-        {% for num in paginator.page_range %}
-          <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-            <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{request.GET.q}}{% endif %}">{{ num }}</a>
+
+        {% for num in page_obj.paginator.page_range %}
+          <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ num }}">{{ num }}</a>
           </li>
         {% endfor %}
+
         {% if page_obj.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{request.GET.q}}{% endif %}">Successiva &raquo;</a>
+            <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next">
+              &raquo;
+            </a>
           </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
         {% endif %}
       </ul>
     </nav>
   {% endif %}
-</div>
+
 {% endblock %}

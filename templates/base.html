@@ -1,16 +1,18 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Music Streaming Service{% endblock %}</title>
-  {% load static %}
+
   <!-- Bootstrap CSS da CDN -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     rel="stylesheet"
     integrity="sha384-…"
     crossorigin="anonymous">
+
   <!-- Il tuo CSS custom -->
   <link href="{% static 'css/styles.css' %}" rel="stylesheet">
 </head>
@@ -23,31 +25,63 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'music:song-list' %}">Brani</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'music:playlist-list' %}">Playlist</a>
+          </li>
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'music:recommendation-list' %}">Raccomandazioni</a>
+            </li>
+          {% endif %}
+          {% if perms.music.add_song %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'music:song-add' %}">Aggiungi brano</a>
+            </li>
+          {% endif %}
+          {% if perms.music.add_genre %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'music:genre-add' %}">Aggiungi genere</a>
+            </li>
+          {% endif %}
+        </ul>
         <ul class="navbar-nav ms-auto">
-          {% if request.user.is_authenticated %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'music:playlist-list' %}">Le mie playlist</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'accounts:profile' %}">Profilo</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a></li>
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:profile' %}">{{ user.username }}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
+            </li>
           {% else %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Login</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'accounts:register' %}">Registrati</a></li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:register' %}">Registrati</a>
+            </li>
           {% endif %}
         </ul>
       </div>
     </div>
   </nav>
 
-  <!-- Contenuto specifico di ciascuna pagina -->
   <div class="container my-4">
     {% if messages %}
       {% for msg in messages %}
         <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">
           {{ msg }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       {% endfor %}
     {% endif %}
-    {% block content %}{% endblock %}
+
+    {% block content %}
+    <!-- Contenuto specifico di ciascuna pagina -->
+    {% endblock %}
   </div>
 
   <!-- Bootstrap JS da CDN -->

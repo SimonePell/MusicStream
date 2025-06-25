@@ -1,14 +1,55 @@
-<!-- templates/music/song_form.html -->
 {% extends 'base.html' %}
-{% block title %}{{ view.object.title if view.object else 'Nuova Canzone' }}{% endblock %}
+
+{% block title %}
+  {% if view.object %}
+    Modifica Canzone: {{ view.object.title }}
+  {% else %}
+    Nuova Canzone
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-  <h2>{{ view.object.title if view.object else 'Aggiungi una nuova canzone' }}</h2>
+  <h1 class="mb-3">
+    {% if view.object %}
+      Modifica Canzone: {{ view.object.title }}
+    {% else %}
+      Nuova Canzone
+    {% endif %}
+  </h1>
+
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Salva</button>
-    <a href="{% url 'music:song-list' %}" class="btn btn-secondary">Annulla</a>
+    {{ form.non_field_errors }}
+
+    <div class="mb-3">
+      {{ form.title.label_tag }}
+      {{ form.title }}
+      {{ form.title.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.artist.label_tag }}
+      {{ form.artist }}
+      {{ form.artist.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.genre.label_tag }}
+      {{ form.genre }}
+      {{ form.genre.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.duration.label_tag }}
+      {{ form.duration }}
+      {{ form.duration.errors }}
+    </div>
+
+    <button class="btn btn-primary">
+      {% if view.object %}Salva Modifiche{% else %}Crea Canzone{% endif %}
+    </button>
+    <a href="{% url 'music:song-list' %}" class="btn btn-secondary ms-2">Annulla</a>
   </form>
 </div>
 {% endblock %}

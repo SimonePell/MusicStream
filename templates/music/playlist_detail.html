@@ -1,32 +1,27 @@
 {% extends 'base.html' %}
-
 {% block title %}{{ playlist.name }}{% endblock %}
-
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1>{{ playlist.name }}</h1>
-    {% if playlist.owner == user %}
-      <div class="btn-group">
-        <a href="{% url 'music:playlist-edit' playlist.pk %}" class="btn btn-warning">Modifica Playlist</a>
-        <a href="{% url 'music:playlist-delete' playlist.pk %}" class="btn btn-danger">Elimina Playlist</a>
-      </div>
-    {% endif %}
-  </div>
-
-  <p class="text-muted">Creato da: {{ playlist.owner.username }}</p>
+  <h1>{{ playlist.name }}</h1>
+  <p>Creato da: {{ playlist.owner.username }}</p>
+  {% if playlist.shared_with.all %}
+    <p>Condivisa con:
+      {% for u in playlist.shared_with.all %}
+        {{ u.username }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
 
   <h3>Canzoni</h3>
-  <ul class="list-group mb-4">
+  <ul class="list-group mb-3">
     {% for song in playlist.songs.all %}
-      <li class="list-group-item">
-        <strong>{{ song.title }}</strong> — {{ song.artist }}
-      </li>
+      <li class="list-group-item">{{ song.title }} – {{ song.artist }}</li>
     {% empty %}
       <li class="list-group-item">Playlist vuota.</li>
     {% endfor %}
   </ul>
 
-  <a href="{% url 'music:playlist-list' %}" class="btn btn-secondary">← Torna alle Playlist</a>
-</div>
+  <a href="{% url 'music:playlist-list' %}" class="btn btn-secondary">← Torna alle playlist</a>
+  {% if playlist.owner == request.user or perms.music.change_playlist %}
+    <a href="{% url 'music:playlist-edit' playlist.pk %}" class="btn btn-primary">Modifica</a>
+  {% endif %}
 {% endblock %}

@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     SongListView, SongDetailView, SongCreateView, SongUpdateView, SongDeleteView,
-    GenreCreateView,
+    GenreListView, GenreCreateView, GenreUpdateView, GenreDeleteView,
     PlaylistListView, PlaylistDetailView, PlaylistCreateView, PlaylistUpdateView, PlaylistDeleteView,
     RecommendationListView
 )
@@ -16,8 +16,12 @@ urlpatterns = [
     path('songs/<int:pk>/edit/', SongUpdateView.as_view(), name='song-edit'),
     path('songs/<int:pk>/delete/', SongDeleteView.as_view(), name='song-delete'),
 
-    # Genre
-    path('genres/add/', GenreCreateView.as_view(), name='genre-add'),
+    # Generi CRUD
+    path('genres/',             GenreListView.as_view(),   name='genre-list'),
+    path('genres/add/',         GenreCreateView.as_view(), name='genre-add'),
+    path('genres/<int:pk>/edit/',   GenreUpdateView.as_view(), name='genre-edit'),
+    path('genres/<int:pk>/delete/', GenreDeleteView.as_view(), name='genre-delete'),
+
 
     # Playlists CRUD
     path('playlists/', PlaylistListView.as_view(), name='playlist-list'),
