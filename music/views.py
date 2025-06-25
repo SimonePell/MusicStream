@@ -11,7 +11,7 @@ from .models import Song, Genre, Playlist, Recommendation
 from .forms import SongForm, GenreForm, PlaylistForm
 
 
-class SongListView(ListView):
+class SongListView(LoginRequiredMixin, ListView):
     model = Song
     template_name = 'music/song_list.html'
     context_object_name = 'songs'
@@ -36,12 +36,18 @@ class SongDetailView(DetailView):
     template_name = 'music/song_detail.html'
     context_object_name = 'song'
 
+
 class SongCreateView(PermissionRequiredMixin, CreateView):
     model = Song
     form_class = SongForm
     template_name = 'music/song_form.html'
     success_url = reverse_lazy('music:song-list')
     permission_required = 'music.add_song'
+
+    def form_valid(self, form):
+        # assegno il nome utente corrente come artist
+        form.instance.artist = self.request.user.username
+        return super().form_valid(form)
 
 class SongUpdateView(PermissionRequiredMixin, UpdateView):
     model = Song
@@ -56,12 +62,6 @@ class SongDeleteView(PermissionRequiredMixin, DeleteView):
     success_url = reverse_lazy('music:song-list')
     permission_required = 'music.delete_song'
 
-class GenreCreateView(PermissionRequiredMixin, CreateView):
-    model = Genre
-    form_class = GenreForm
-    template_name = 'music/genre_form.html'
-    success_url = reverse_lazy('music:song-list')
-    permission_required = 'music.add_genre'
 
 class PlaylistListView(LoginRequiredMixin, ListView):
     model = Playlist
@@ -144,11 +144,10 @@ class RecommendationListView(LoginRequiredMixin, ListView):
         return qs
 
 # Lista generi (view per Curator e Listener – entrambi possono vedere i generi)
-class GenreListView(PermissionRequiredMixin, ListView):
+class GenreListView(LoginRequiredMixin, ListView):
     model = Genre
     template_name = 'music/genre_list.html'
     context_object_name = 'genres'
-    permission_required = 'music.view_genre'
 
 
 # Creazione (già esistente)

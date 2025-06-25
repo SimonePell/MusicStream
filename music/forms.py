@@ -3,16 +3,40 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from .models import Song, Genre, Playlist
+from datetime import timedelta
 
 User = get_user_model()
 
 class SongForm(forms.ModelForm):
+    duration_min = forms.IntegerField(
+        label="Durata (minuti)",
+        min_value=0,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'Es. 3'
+        })
+    )
+
     class Meta:
         model = Song
-        fields = ['title', 'artist', 'genre', 'duration']
-        widgets = {
-            'duration': forms.TimeInput(format='%H:%M:%S', attrs={'type': 'time'}),
-        }
+        # NON includiamo più 'artist' fra i campi del form: la mettiamo da view
+        fields = ['title', 'genre']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # inizializza duration_min se stai editando
+        if self.instance and self.instance.pk:
+            secs = self.instance.duration.total_seconds()
+            self.fields['duration_min'].initial = int(secs // 60)
+
+    def save(self, commit=True):
+        inst = super().save(commit=False)
+        # metto la durata
+        mins = self.cleaned_data['duration_min']
+        inst.duration = timedelta(minutes=mins)
+        if commit:
+            inst.save()
+        return inst
 
 class GenreForm(forms.ModelForm):
     class Meta:

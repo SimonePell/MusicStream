@@ -6,14 +6,15 @@ class Genre(models.Model):
     def __str__(self):
         return self.name
 
+
 class Song(models.Model):
-    title    = models.CharField(max_length=200)
-    artist   = models.CharField(max_length=200)
-    genre    = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, related_name='songs')
-    duration = models.DurationField()
+    title      = models.CharField(max_length=200)
+    artist     = models.CharField(max_length=150)
+    genre      = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    duration   = models.DurationField()
 
     def __str__(self):
-        return f"{self.title} – {self.artist}"
+        return f"{self.title} by {self.artist}"
 
 class Playlist(models.Model):
     name       = models.CharField(max_length=200)
