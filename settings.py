@@ -1,6 +1,15 @@
 import environ
 from pathlib import Path
 import dj_database_url
+import os
+if os.environ.get("RAILWAY_ENVIRONMENT"):
+    # siamo in Railway: NON leggere il file .env
+    env = environ.Env(DEBUG=(bool, False))
+else:
+    # siamo in locale: carica .env
+    env = environ.Env(DEBUG=(bool, False))
+    env.read_env()
+
 
 # 1) Legge il .env nella root
 env = environ.Env(
