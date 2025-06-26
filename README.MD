@@ -67,12 +67,12 @@ Listener:
 
 Username: demo_listener1
 
-Password: pass1234
+Password: qsxdr1234
 
 Curator:
 
 Username: demo_curator1
 
-Password: pass1234
+Password: qsxdr1234
 
  https://musicstream-production.up.railway.app/
